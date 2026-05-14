@@ -1,0 +1,5 @@
+[autorun]
+open=一键启动开发.bat
+icon=claw.ico
+label=及时claw助手
+action=启动及时claw助手

@@ -1,0 +1,20 @@
+[package]
+name = "jishi-claw-assistant"
+version = "1.0.0"
+edition = "2021"
+authors = ["及时claw助手"]
+description = "及时claw助手 - USB即插即用 OpenClaw 便携版"
+license = "MIT"
+
+[lib]
+name = "jishi_claw_assistant_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
