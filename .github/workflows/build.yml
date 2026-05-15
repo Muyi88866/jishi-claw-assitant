@@ -41,6 +41,7 @@ jobs:
       with:
         name: jishi-claw-executable
         path: src-tauri/target/release/jishi-claw-assistant.exe
+        # Added comment to trigger new build (Run #15)
     
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
