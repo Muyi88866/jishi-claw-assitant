@@ -553,54 +553,8 @@
       </div>
     </div>
     
-    <div class="agent-list">
-      <div class="agent-item active" data-agent="main">
-        <div class="agent-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">🤖</div>
-        <div class="agent-info">
-          <h3>QClaw</h3>
-          <p>官方默认Agent</p>
-        </div>
-      </div>
-      
-      <div class="agent-item" data-agent="xiaohongshu">
-        <div class="agent-avatar" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">📱</div>
-        <div class="agent-info">
-          <h3>小红书爆款操盘手</h3>
-          <p>爆款内容创作</p>
-        </div>
-      </div>
-      
-      <div class="agent-item" data-agent="zimeiti">
-        <div class="agent-avatar" style="background: linear-gradient(135deg, #f39c12, #e67e22);">📝</div>
-        <div class="agent-info">
-          <h3>自媒体选题策划师</h3>
-          <p>选题策划专家</p>
-        </div>
-      </div>
-      
-      <div class="agent-item" data-agent="zhibo">
-        <div class="agent-avatar" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">🎬</div>
-        <div class="agent-info">
-          <h3>直播电商主播教练</h3>
-          <p>话术技巧指导</p>
-        </div>
-      </div>
-      
-      <div class="agent-item" data-agent="image">
-        <div class="agent-avatar" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">🎨</div>
-        <div class="agent-info">
-          <h3>图像提示词工程师</h3>
-          <p>AI绘图提示词</p>
-        </div>
-      </div>
-      
-      <div class="agent-item" data-agent="devops">
-        <div class="agent-avatar" style="background: linear-gradient(135deg, #3498db, #2980b9);">⚙️</div>
-        <div class="agent-info">
-          <h3>DevOps自动化师</h3>
-          <p>运维自动化专家</p>
-        </div>
-      </div>
+    <div class="agent-list" id="agentList">
+      <!-- Agent列表将由JS动态生成 -->
     </div>
     
     <div class="sidebar-footer">
@@ -671,8 +625,8 @@
       
       <div class="form-group">
         <label>模型</label>
-        <input type="text" id="settingModel" placeholder="qclaw/pool-glm-5.1" />
-        <div class="hint">使用的 AI 模型名称</div>
+        <input type="text" id="settingModel" placeholder="openclaw/main" />
+        <div class="hint">模型名称，格式: openclaw 或 openclaw/<agentId></div>
       </div>
       
       <div class="settings-actions">
@@ -685,49 +639,111 @@
   <script type="module">
     const { invoke } = window.__TAURI__.core;
     
-    // Agent 数据及系统提示
-    const agents = {
-      main: { 
-        name: 'QClaw', 
-        desc: '官方默认Agent · 随时随地，帮您高效干活',
-        systemPrompt: '你是QClaw，一个智能AI助手。随时随地，帮用户高效干活。请用中文回复。'
-      },
-      xiaohongshu: { 
-        name: '小红书爆款操盘手', 
-        desc: '爆款内容创作 · 小红书运营专家',
-        systemPrompt: '你是一位小红书爆款内容操盘手，精通小红书平台的算法机制、爆款笔记的创作技巧、选题策划、标题优化、封面设计建议。你擅长用emoji、网感语言和独特的视角来打造爆款内容。请用中文回复。'
-      },
-      zimeiti: { 
-        name: '自媒体选题策划师', 
-        desc: '选题策划专家 · 内容策略指导',
-        systemPrompt: '你是一位资深自媒体选题策划师，擅长各平台（微信公众号、抖音、B站、小红书等）的内容选题策划、热点追踪、差异化定位。你能根据用户的需求提供有针对性的选题建议和内容策略。请用中文回复。'
-      },
-      zhibo: { 
-        name: '直播电商主播教练', 
-        desc: '话术技巧指导 · 直播带货培训',
-        systemPrompt: '你是一位直播电商主播教练，精通直播带货的各个环节：开场话术、产品讲解、互动技巧、逼单话术、流量获取、数据分析。你能提供实战级别的话术模板和运营建议。请用中文回复。'
-      },
-      image: { 
-        name: '图像提示词工程师', 
-        desc: 'AI绘图提示词 · Midjourney/SD专家',
-        systemPrompt: '你是一位AI图像提示词工程师，精通Midjourney、Stable Diffusion、DALL-E等AI绘图工具的提示词编写。你能根据用户的描述需求，生成高质量的英文提示词（prompt），并解释每个参数的作用。请用中文解释，提示词用英文。'
-      },
-      devops: { 
-        name: 'DevOps自动化师', 
-        desc: '运维自动化专家 · CI/CD架构设计',
-        systemPrompt: '你是一位DevOps自动化专家，精通CI/CD流水线设计、Docker容器化、Kubernetes编排、云原生架构、自动化运维。你能提供最佳实践方案和具体的配置文件。请用中文回复。'
-      }
-    };
+    // Agent颜色和图标映射
+    const agentStyles = [
+      { gradient: 'linear-gradient(135deg, #667eea, #764ba2)', icon: '🤖' },
+      { gradient: 'linear-gradient(135deg, #ff6b6b, #ee5a24)', icon: '📱' },
+      { gradient: 'linear-gradient(135deg, #f39c12, #e67e22)', icon: '📝' },
+      { gradient: 'linear-gradient(135deg, #e74c3c, #c0392b)', icon: '🎬' },
+      { gradient: 'linear-gradient(135deg, #9b59b6, #8e44ad)', icon: '🎨' },
+      { gradient: 'linear-gradient(135deg, #3498db, #2980b9)', icon: '⚙️' },
+      { gradient: 'linear-gradient(135deg, #2ecc71, #27ae60)', icon: '💼' },
+      { gradient: 'linear-gradient(135deg, #1abc9c, #16a085)', icon: '📊' },
+      { gradient: 'linear-gradient(135deg, #e67e22, #d35400)', icon: '🔧' },
+      { gradient: 'linear-gradient(135deg, #9b59b6, #6c5ce7)', icon: '🚀' },
+    ];
     
-    let currentAgent = 'main';
+    let currentAgentId = 'main';
     let chatHistories = {}; // 每个Agent独立的对话历史
     let isConnected = false;
     let isSending = false;
+    let agentList = []; // 从API获取的Agent列表
     
-    // 初始化每个Agent的对话历史
-    Object.keys(agents).forEach(key => {
-      chatHistories[key] = [];
-    });
+    // ==================== Agent列表 ====================
+    
+    async function loadAgents() {
+      try {
+        const agents = await invoke('get_agents');
+        agentList = agents;
+        renderAgentList();
+      } catch (err) {
+        console.error('获取Agent列表失败:', err);
+        // 如果获取失败，使用默认列表
+        agentList = [{ id: 'main', name: 'QClaw', model_id: 'openclaw/main' }];
+        renderAgentList();
+      }
+    }
+    
+    function renderAgentList() {
+      const container = document.getElementById('agentList');
+      container.innerHTML = '';
+      
+      agentList.forEach((agent, index) => {
+        const style = agentStyles[index % agentStyles.length];
+        const isActive = agent.id === currentAgentId;
+        
+        const el = document.createElement('div');
+        el.className = 'agent-item' + (isActive ? ' active' : '');
+        el.dataset.agent = agent.id;
+        el.innerHTML = `
+          <div class="agent-avatar" style="background: ${style.gradient};">${style.icon}</div>
+          <div class="agent-info">
+            <h3>${escapeHtml(agent.name)}</h3>
+            <p>${escapeHtml(agent.model_id)}</p>
+          </div>
+        `;
+        el.addEventListener('click', () => switchAgent(agent.id));
+        container.appendChild(el);
+      });
+    }
+    
+    function switchAgent(agentId) {
+      currentAgentId = agentId;
+      
+      // 初始化对话历史
+      if (!chatHistories[agentId]) chatHistories[agentId] = [];
+      
+      // 更新UI高亮
+      document.querySelectorAll('.agent-item').forEach(i => i.classList.remove('active'));
+      document.querySelector(`.agent-item[data-agent="${agentId}"]`)?.classList.add('active');
+      
+      // 更新头部信息
+      const agent = agentList.find(a => a.id === agentId);
+      document.getElementById('currentAgentName').textContent = agent ? agent.name : 'QClaw';
+      document.getElementById('currentAgentDesc').textContent = agent ? agent.model_id : '';
+      
+      // 恢复对话历史
+      const chatMessages = document.getElementById('chatMessages');
+      chatMessages.innerHTML = '';
+      
+      if (chatHistories[agentId].length === 0) {
+        document.getElementById('welcomeScreen').style.display = 'flex';
+        chatMessages.appendChild(createWelcomeScreen());
+      } else {
+        document.getElementById('welcomeScreen')?.remove();
+        chatHistories[agentId].forEach(msg => {
+          addMessage(msg.role, msg.content);
+        });
+      }
+    }
+    
+    function createWelcomeScreen() {
+      const div = document.createElement('div');
+      div.className = 'welcome-screen';
+      div.id = 'welcomeScreen';
+      div.innerHTML = `
+        <div class="welcome-icon">🦞</div>
+        <h2>欢迎使用及时claw助手</h2>
+        <p>USB 即插即用的 OpenClaw 便携版应用。连接 OpenClaw 后，从左侧选择一个 Agent 开始对话。</p>
+        <div class="quick-actions">
+          <button class="quick-btn" onclick="quickStart('你好，请介绍一下你自己')">👋 打个招呼</button>
+          <button class="quick-btn" onclick="quickStart('帮我写一篇小红书爆款笔记')">📝 写爆款笔记</button>
+          <button class="quick-btn" onclick="quickStart('帮我策划一个自媒体选题')">💡 选题策划</button>
+          <button class="quick-btn" onclick="quickStart('帮我生成一张AI图片的提示词')">🎨 AI绘图</button>
+        </div>
+      `;
+      return div;
+    }
     
     // ==================== 连接管理 ====================
     
@@ -745,10 +761,11 @@
         if (result.connected) {
           statusDot.className = 'status-dot connected';
           statusText.textContent = '已连接';
+          // 连接成功后加载Agent列表
+          await loadAgents();
         } else {
           statusDot.className = 'status-dot';
           statusText.textContent = '未连接';
-          // 如果未连接，显示提示
           addSystemMessage('⚠️ ' + result.message);
         }
       } catch (err) {
@@ -769,13 +786,15 @@
       if (!text) return;
       
       // 隐藏欢迎界面
-      document.getElementById('welcomeScreen').style.display = 'none';
+      const welcome = document.getElementById('welcomeScreen');
+      if (welcome) welcome.style.display = 'none';
       
       // 添加用户消息到UI
       addMessage('user', text);
       
-      // 添加到对话历史
-      chatHistories[currentAgent].push({ role: 'user', content: text });
+      // 初始化对话历史
+      if (!chatHistories[currentAgentId]) chatHistories[currentAgentId] = [];
+      chatHistories[currentAgentId].push({ role: 'user', content: text });
       
       input.value = '';
       autoResize(input);
@@ -791,21 +810,23 @@
       const typingEl = showTyping();
       
       try {
-        // 构造消息列表（包含系统提示）
-        const systemPrompt = agents[currentAgent].systemPrompt;
-        const messages = [
-          { role: 'system', content: systemPrompt },
-          ...chatHistories[currentAgent]
-        ];
+        // 构造消息列表
+        const messages = chatHistories[currentAgentId].map(m => ({
+          role: m.role,
+          content: m.content
+        }));
         
-        const result = await invoke('send_chat_message', { messages });
+        const result = await invoke('send_chat_message', { 
+          messages,
+          agentId: currentAgentId
+        });
         
         // 移除打字动画
         typingEl.remove();
         
         // 添加AI回复
         addMessage('assistant', result);
-        chatHistories[currentAgent].push({ role: 'assistant', content: result });
+        chatHistories[currentAgentId].push({ role: 'assistant', content: result });
       } catch (err) {
         typingEl.remove();
         addMessage('assistant', '❌ 请求失败: ' + err);
@@ -823,7 +844,8 @@
       msg.className = `message ${role}`;
       
       const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-      const senderName = role === 'user' ? '你' : agents[currentAgent].name;
+      const agent = agentList.find(a => a.id === currentAgentId);
+      const senderName = role === 'user' ? '你' : (agent ? agent.name : 'AI');
       
       msg.innerHTML = `
         <div class="message-bubble">${escapeHtml(content)}</div>
@@ -882,8 +904,8 @@
     function clearChat() {
       const chatMessages = document.getElementById('chatMessages');
       chatMessages.innerHTML = '';
-      document.getElementById('welcomeScreen').style.display = 'flex';
-      chatHistories[currentAgent] = [];
+      chatHistories[currentAgentId] = [];
+      chatMessages.appendChild(createWelcomeScreen());
     }
     
     function quickStart(text) {
@@ -891,47 +913,18 @@
       sendMessage();
     }
     
-    // ==================== Agent 切换 ====================
-    
-    document.querySelectorAll('.agent-item').forEach(item => {
-      item.addEventListener('click', () => {
-        document.querySelectorAll('.agent-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        
-        currentAgent = item.dataset.agent;
-        const agent = agents[currentAgent];
-        document.getElementById('currentAgentName').textContent = agent.name;
-        document.getElementById('currentAgentDesc').textContent = agent.desc;
-        
-        // 切换Agent时恢复对应的对话历史
-        const chatMessages = document.getElementById('chatMessages');
-        chatMessages.innerHTML = '';
-        
-        if (chatHistories[currentAgent].length === 0) {
-          document.getElementById('welcomeScreen').style.display = 'flex';
-        } else {
-          document.getElementById('welcomeScreen').style.display = 'none';
-          // 恢复历史消息
-          chatHistories[currentAgent].forEach(msg => {
-            addMessage(msg.role, msg.content);
-          });
-        }
-      });
-    });
-    
     // ==================== 设置面板 ====================
     
     function openSettings() {
-      // 加载当前配置
       invoke('get_config').then(config => {
         document.getElementById('settingUrl').value = config.url || 'http://127.0.0.1:28789';
         document.getElementById('settingApiKey').value = config.api_key || '';
-        document.getElementById('settingModel').value = config.model || 'qclaw/pool-glm-5.1';
+        document.getElementById('settingModel').value = config.model || 'openclaw/main';
         document.getElementById('settingsOverlay').classList.add('show');
       }).catch(err => {
         document.getElementById('settingUrl').value = 'http://127.0.0.1:28789';
         document.getElementById('settingApiKey').value = '';
-        document.getElementById('settingModel').value = 'qclaw/pool-glm-5.1';
+        document.getElementById('settingModel').value = 'openclaw/main';
         document.getElementById('settingsOverlay').classList.add('show');
       });
     }
@@ -948,15 +941,14 @@
     
     async function saveSettings() {
       const config = {
-        url: document.getElementById('settingUrl').value.trim() || 'http://localhost:3000',
+        url: document.getElementById('settingUrl').value.trim() || 'http://127.0.0.1:28789',
         api_key: document.getElementById('settingApiKey').value.trim(),
-        model: document.getElementById('settingModel').value.trim() || 'qclaw/pool-glm-5.1',
+        model: document.getElementById('settingModel').value.trim() || 'openclaw/main',
       };
       
       try {
         await invoke('save_config_cmd', { config });
         closeSettings();
-        // 保存后自动测试连接
         await testConnection();
       } catch (err) {
         alert('保存设置失败: ' + err);

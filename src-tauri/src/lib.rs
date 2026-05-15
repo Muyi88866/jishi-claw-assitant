@@ -14,7 +14,7 @@ impl Default for OpenClawConfig {
         Self {
             url: "http://127.0.0.1:28789".to_string(),
             api_key: "455a8e1c7e9c1da9070cf1745ae41b63446a6574d2f10310".to_string(),
-            model: "qclaw/pool-glm-5.1".to_string(),
+            model: "openclaw/main".to_string(),
         }
     }
 }
@@ -56,6 +56,25 @@ struct ConnectionStatus {
     connected: bool,
     message: String,
     config: OpenClawConfig,
+}
+
+/// Agent 信息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct AgentInfo {
+    id: String,
+    name: String,
+    model_id: String,
+}
+
+/// Models API 响应
+#[derive(Debug, Deserialize)]
+struct ModelsResponse {
+    data: Vec<ModelItem>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ModelItem {
+    id: String,
 }
 
 /// 创建 HTTP 客户端
@@ -112,6 +131,7 @@ pub fn run() {
             get_config,
             save_config_cmd,
             get_system_info,
+            get_agents,
         ])
         .setup(|app| {
             #[cfg(debug_assertions)]
@@ -136,12 +156,16 @@ async fn test_connection(app: tauri::AppHandle) -> ConnectionStatus {
     let config = load_config(&app);
     let client = create_client();
 
-    let url = format!("{}/api/v1/status", config.url.trim_end_matches('/'));
+    let url = format!("{}/v1/models", config.url.trim_end_matches('/'));
 
-    match client.get(&url)
-        .timeout(std::time::Duration::from_secs(10))
-        .send()
-        .await
+    let mut req_builder = client.get(&url)
+        .timeout(std::time::Duration::from_secs(10));
+
+    if !config.api_key.is_empty() {
+        req_builder = req_builder.header("Authorization", format!("Bearer {}", config.api_key));
+    }
+
+    match req_builder.send().await
     {
         Ok(response) => {
             if response.status().is_success() {
@@ -173,14 +197,21 @@ async fn test_connection(app: tauri::AppHandle) -> ConnectionStatus {
 async fn send_chat_message(
     app: tauri::AppHandle,
     messages: Vec<ChatMessage>,
+    agent_id: Option<String>,
 ) -> Result<String, String> {
     let config = load_config(&app);
     let client = create_client();
 
     let url = format!("{}/v1/chat/completions", config.url.trim_end_matches('/'));
 
+    // 如果指定了agent_id，用 openclaw/<agent_id> 格式
+    let model = match agent_id {
+        Some(ref aid) if !aid.is_empty() => format!("openclaw/{}", aid),
+        _ => config.model.clone(),
+    };
+
     let request = ChatRequest {
-        model: config.model.clone(),
+        model,
         messages,
         stream: false,
     };
@@ -236,4 +267,53 @@ async fn get_system_info() -> serde_json::Value {
         "version": env!("CARGO_PKG_VERSION"),
         "name": env!("CARGO_PKG_NAME"),
     })
+}
+
+/// 获取 OpenClaw 可用的 Agent 列表
+#[tauri::command]
+async fn get_agents(app: tauri::AppHandle) -> Result<Vec<AgentInfo>, String> {
+    let config = load_config(&app);
+    let client = create_client();
+
+    let url = format!("{}/v1/models", config.url.trim_end_matches('/'));
+
+    let mut req_builder = client.get(&url)
+        .timeout(std::time::Duration::from_secs(10));
+
+    if !config.api_key.is_empty() {
+        req_builder = req_builder.header("Authorization", format!("Bearer {}", config.api_key));
+    }
+
+    match req_builder.send().await {
+        Ok(response) => {
+            if response.status().is_success() {
+                match response.json::<ModelsResponse>().await {
+                    Ok(models) => {
+                        let agents: Vec<AgentInfo> = models.data
+                            .into_iter()
+                            .filter(|m| m.id.starts_with("openclaw/"))
+                            .map(|m| {
+                                let agent_id = m.id.trim_start_matches("openclaw/").to_string();
+                                let name = match agent_id.as_str() {
+                                    "main" => "QClaw (默认助手)".to_string(),
+                                    "default" => "默认Agent".to_string(),
+                                    id => id.to_string(),
+                                };
+                                AgentInfo {
+                                    id: agent_id,
+                                    name,
+                                    model_id: m.id.clone(),
+                                }
+                            })
+                            .collect();
+                        Ok(agents)
+                    }
+                    Err(e) => Err(format!("解析Agent列表失败: {}", e))
+                }
+            } else {
+                Err(format!("获取Agent列表失败: {}", response.status()))
+            }
+        }
+        Err(e) => Err(format!("连接OpenClaw失败: {}", e))
+    }
 }
