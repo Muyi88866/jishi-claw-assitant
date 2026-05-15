@@ -34,7 +34,7 @@ jobs:
       run: npm install -g @tauri-apps/cli
     
     - name: Build Tauri app
-      run: npm run tauri build -- --bundles none
+      run: tauri build --bundles none
     
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
