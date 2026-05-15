@@ -12,8 +12,8 @@ struct OpenClawConfig {
 impl Default for OpenClawConfig {
     fn default() -> Self {
         Self {
-            url: "http://localhost:3000".to_string(),
-            api_key: "".to_string(),
+            url: "http://127.0.0.1:28789".to_string(),
+            api_key: "455a8e1c7e9c1da9070cf1745ae41b63446a6574d2f10310".to_string(),
             model: "qclaw/pool-glm-5.1".to_string(),
         }
     }

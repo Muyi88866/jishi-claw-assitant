@@ -659,8 +659,8 @@
       
       <div class="form-group">
         <label>服务地址</label>
-        <input type="text" id="settingUrl" placeholder="http://localhost:3000" />
-        <div class="hint">OpenClaw 服务地址，默认为本机 3000 端口</div>
+        <input type="text" id="settingUrl" placeholder="http://127.0.0.1:28789" />
+        <div class="hint">OpenClaw 服务地址，默认为本机 28789 端口</div>
       </div>
       
       <div class="form-group">
@@ -924,12 +924,12 @@
     function openSettings() {
       // 加载当前配置
       invoke('get_config').then(config => {
-        document.getElementById('settingUrl').value = config.url || 'http://localhost:3000';
+        document.getElementById('settingUrl').value = config.url || 'http://127.0.0.1:28789';
         document.getElementById('settingApiKey').value = config.api_key || '';
         document.getElementById('settingModel').value = config.model || 'qclaw/pool-glm-5.1';
         document.getElementById('settingsOverlay').classList.add('show');
       }).catch(err => {
-        document.getElementById('settingUrl').value = 'http://localhost:3000';
+        document.getElementById('settingUrl').value = 'http://127.0.0.1:28789';
         document.getElementById('settingApiKey').value = '';
         document.getElementById('settingModel').value = 'qclaw/pool-glm-5.1';
         document.getElementById('settingsOverlay').classList.add('show');
