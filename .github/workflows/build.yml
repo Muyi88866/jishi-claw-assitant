@@ -31,11 +31,15 @@ jobs:
       run: npm run build
     
     - name: Build Tauri app
-      uses: tauri-apps/tauri-action@v0
+      run: |
+        cd src-tauri
+        cargo build --release
+      
+    - name: Build Tauri bundle
+      run: |
+        npm run tauri build
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        projectPath: ./
     
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
