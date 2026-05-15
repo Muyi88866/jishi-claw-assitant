@@ -36,6 +36,12 @@ jobs:
         projectPath: '.'
         args: '--no-bundle'
     
+    - name: Upload executable as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: jishi-claw-executable
+        path: src-tauri/target/release/jishi-claw-assistant.exe
+    
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
