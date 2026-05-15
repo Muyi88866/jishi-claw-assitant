@@ -17,6 +17,9 @@
       --text-primary: #e0e0e0;
       --text-secondary: #888;
       --border-color: #333;
+      --success-color: #2ecc71;
+      --error-color: #e74c3c;
+      --warning-color: #f39c12;
     }
     
     body {
@@ -69,6 +72,40 @@
       color: var(--text-secondary);
     }
     
+    .connection-status {
+      margin-top: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.05);
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--error-color);
+      flex-shrink: 0;
+    }
+    
+    .status-dot.connected {
+      background: var(--success-color);
+      box-shadow: 0 0 8px rgba(46, 204, 113, 0.5);
+    }
+    
+    .status-dot.connecting {
+      background: var(--warning-color);
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    
     .agent-list {
       flex: 1;
       overflow-y: auto;
@@ -118,6 +155,21 @@
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 140px;
+    }
+    
+    /* 侧边栏底部 */
+    .sidebar-footer {
+      padding: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .sidebar-footer .btn {
+      width: 100%;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
     
     /* 右侧主区域 */
@@ -178,6 +230,17 @@
       border: none;
     }
     
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-success {
+      background: var(--success-color);
+      border: none;
+      color: #fff;
+    }
+    
     /* 对话区域 */
     .chat-messages {
       flex: 1;
@@ -204,6 +267,8 @@
       padding: 12px 16px;
       border-radius: 12px;
       line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
     
     .message.user .message-bubble {
@@ -221,6 +286,33 @@
       color: var(--text-secondary);
       margin-top: 4px;
       padding: 0 4px;
+    }
+    
+    .message.user .message-meta {
+      text-align: right;
+    }
+    
+    /* 打字动画 */
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 8px 0;
+    }
+    
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-secondary);
+      animation: typing 1.4s infinite ease-in-out;
+    }
+    
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+      30% { transform: translateY(-8px); opacity: 1; }
     }
     
     /* 输入区域 */
@@ -246,6 +338,10 @@
       align-items: center;
     }
     
+    .input-box:focus-within {
+      border-color: var(--primary-color);
+    }
+    
     .input-box textarea {
       flex: 1;
       background: transparent;
@@ -256,6 +352,7 @@
       resize: none;
       max-height: 120px;
       line-height: 1.5;
+      font-family: inherit;
     }
     
     .input-box textarea::placeholder {
@@ -283,6 +380,7 @@
       opacity: 0.5;
       cursor: not-allowed;
       transform: none;
+      box-shadow: none;
     }
     
     /* 欢迎界面 */
@@ -325,6 +423,8 @@
       display: flex;
       gap: 12px;
       margin-top: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
     
     .quick-btn {
@@ -341,6 +441,80 @@
     .quick-btn:hover {
       border-color: var(--primary-color);
       background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    }
+    
+    /* 设置面板 */
+    .settings-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .settings-overlay.show {
+      display: flex;
+    }
+    
+    .settings-panel {
+      background: var(--bg-darker);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 32px;
+      width: 480px;
+      max-width: 90vw;
+    }
+    
+    .settings-panel h2 {
+      font-size: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+    }
+    
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--primary-color);
+    }
+    
+    .form-group .hint {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    
+    .settings-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
     }
     
     /* 滚动条样式 */
@@ -372,6 +546,10 @@
           <h1>及时claw助手</h1>
           <span>USB 即插即用</span>
         </div>
+      </div>
+      <div class="connection-status" id="connectionStatus" onclick="testConnection()">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">未连接</span>
       </div>
     </div>
     
@@ -424,6 +602,10 @@
         </div>
       </div>
     </div>
+    
+    <div class="sidebar-footer">
+      <button class="btn" onclick="openSettings()">⚙️ 连接设置</button>
+    </div>
   </aside>
   
   <!-- 右侧主区域 -->
@@ -435,7 +617,7 @@
       </div>
       <div class="chat-actions">
         <button class="btn" onclick="clearChat()">清空对话</button>
-        <button class="btn btn-primary" onclick="callBackend()">测试后端</button>
+        <button class="btn btn-primary" onclick="testConnection()">🔄 重连</button>
       </div>
     </header>
     
@@ -444,11 +626,12 @@
       <div class="welcome-screen" id="welcomeScreen">
         <div class="welcome-icon">🦞</div>
         <h2>欢迎使用及时claw助手</h2>
-        <p>这是一个 USB 即插即用的 OpenClaw 便携版应用。从左侧选择一个 Agent 开始对话，或点击下方快捷按钮快速开始。</p>
+        <p>USB 即插即用的 OpenClaw 便携版应用。连接 OpenClaw 后，从左侧选择一个 Agent 开始对话。</p>
         <div class="quick-actions">
           <button class="quick-btn" onclick="quickStart('帮我写一篇小红书爆款笔记')">📝 写爆款笔记</button>
           <button class="quick-btn" onclick="quickStart('帮我策划一个自媒体选题')">💡 选题策划</button>
           <button class="quick-btn" onclick="quickStart('帮我生成一张AI图片的提示词')">🎨 AI绘图</button>
+          <button class="quick-btn" onclick="quickStart('你好，请介绍一下你自己')">👋 打个招呼</button>
         </div>
       </div>
     </div>
@@ -461,6 +644,7 @@
             placeholder="输入消息，按 Enter 发送，Shift+Enter 换行..." 
             rows="1"
             onkeydown="handleKeyDown(event)"
+            oninput="autoResize(this)"
           ></textarea>
         </div>
         <button class="send-btn" id="sendBtn" onclick="sendMessage()">发送</button>
@@ -468,40 +652,118 @@
     </div>
   </main>
 
+  <!-- 设置面板 -->
+  <div class="settings-overlay" id="settingsOverlay" onclick="closeSettingsOutside(event)">
+    <div class="settings-panel">
+      <h2>⚙️ OpenClaw 连接设置</h2>
+      
+      <div class="form-group">
+        <label>服务地址</label>
+        <input type="text" id="settingUrl" placeholder="http://localhost:3000" />
+        <div class="hint">OpenClaw 服务地址，默认为本机 3000 端口</div>
+      </div>
+      
+      <div class="form-group">
+        <label>API 密钥（可选）</label>
+        <input type="password" id="settingApiKey" placeholder="留空表示无需认证" />
+        <div class="hint">如果 OpenClaw 设置了 API 密钥认证，请在此填写</div>
+      </div>
+      
+      <div class="form-group">
+        <label>模型</label>
+        <input type="text" id="settingModel" placeholder="qclaw/pool-glm-5.1" />
+        <div class="hint">使用的 AI 模型名称</div>
+      </div>
+      
+      <div class="settings-actions">
+        <button class="btn" onclick="closeSettings()">取消</button>
+        <button class="btn btn-primary" onclick="saveSettings()">💾 保存并连接</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     const { invoke } = window.__TAURI__.core;
     
-    // Agent 数据
+    // Agent 数据及系统提示
     const agents = {
-      main: { name: 'QClaw', desc: '官方默认Agent · 随时随地，帮您高效干活' },
-      xiaohongshu: { name: '小红书爆款操盘手', desc: '爆款内容创作 · 小红书运营专家' },
-      zimeiti: { name: '自媒体选题策划师', desc: '选题策划专家 · 内容策略指导' },
-      zhibo: { name: '直播电商主播教练', desc: '话术技巧指导 · 直播带货培训' },
-      image: { name: '图像提示词工程师', desc: 'AI绘图提示词 · Midjourney/SD专家' },
-      devops: { name: 'DevOps自动化师', desc: '运维自动化专家 · CI/CD架构设计' }
+      main: { 
+        name: 'QClaw', 
+        desc: '官方默认Agent · 随时随地，帮您高效干活',
+        systemPrompt: '你是QClaw，一个智能AI助手。随时随地，帮用户高效干活。请用中文回复。'
+      },
+      xiaohongshu: { 
+        name: '小红书爆款操盘手', 
+        desc: '爆款内容创作 · 小红书运营专家',
+        systemPrompt: '你是一位小红书爆款内容操盘手，精通小红书平台的算法机制、爆款笔记的创作技巧、选题策划、标题优化、封面设计建议。你擅长用emoji、网感语言和独特的视角来打造爆款内容。请用中文回复。'
+      },
+      zimeiti: { 
+        name: '自媒体选题策划师', 
+        desc: '选题策划专家 · 内容策略指导',
+        systemPrompt: '你是一位资深自媒体选题策划师，擅长各平台（微信公众号、抖音、B站、小红书等）的内容选题策划、热点追踪、差异化定位。你能根据用户的需求提供有针对性的选题建议和内容策略。请用中文回复。'
+      },
+      zhibo: { 
+        name: '直播电商主播教练', 
+        desc: '话术技巧指导 · 直播带货培训',
+        systemPrompt: '你是一位直播电商主播教练，精通直播带货的各个环节：开场话术、产品讲解、互动技巧、逼单话术、流量获取、数据分析。你能提供实战级别的话术模板和运营建议。请用中文回复。'
+      },
+      image: { 
+        name: '图像提示词工程师', 
+        desc: 'AI绘图提示词 · Midjourney/SD专家',
+        systemPrompt: '你是一位AI图像提示词工程师，精通Midjourney、Stable Diffusion、DALL-E等AI绘图工具的提示词编写。你能根据用户的描述需求，生成高质量的英文提示词（prompt），并解释每个参数的作用。请用中文解释，提示词用英文。'
+      },
+      devops: { 
+        name: 'DevOps自动化师', 
+        desc: '运维自动化专家 · CI/CD架构设计',
+        systemPrompt: '你是一位DevOps自动化专家，精通CI/CD流水线设计、Docker容器化、Kubernetes编排、云原生架构、自动化运维。你能提供最佳实践方案和具体的配置文件。请用中文回复。'
+      }
     };
     
     let currentAgent = 'main';
-    let messages = [];
+    let chatHistories = {}; // 每个Agent独立的对话历史
+    let isConnected = false;
+    let isSending = false;
     
-    // Agent 切换
-    document.querySelectorAll('.agent-item').forEach(item => {
-      item.addEventListener('click', () => {
-        document.querySelectorAll('.agent-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        
-        currentAgent = item.dataset.agent;
-        const agent = agents[currentAgent];
-        document.getElementById('currentAgentName').textContent = agent.name;
-        document.getElementById('currentAgentDesc').textContent = agent.desc;
-        
-        // 切换 Agent 时保留欢迎界面
-        document.getElementById('welcomeScreen').style.display = 'flex';
-      });
+    // 初始化每个Agent的对话历史
+    Object.keys(agents).forEach(key => {
+      chatHistories[key] = [];
     });
     
-    // 发送消息
+    // ==================== 连接管理 ====================
+    
+    async function testConnection() {
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      
+      statusDot.className = 'status-dot connecting';
+      statusText.textContent = '连接中...';
+      
+      try {
+        const result = await invoke('test_connection');
+        isConnected = result.connected;
+        
+        if (result.connected) {
+          statusDot.className = 'status-dot connected';
+          statusText.textContent = '已连接';
+        } else {
+          statusDot.className = 'status-dot';
+          statusText.textContent = '未连接';
+          // 如果未连接，显示提示
+          addSystemMessage('⚠️ ' + result.message);
+        }
+      } catch (err) {
+        isConnected = false;
+        statusDot.className = 'status-dot';
+        statusText.textContent = '连接失败';
+        addSystemMessage('❌ 连接测试失败: ' + err);
+      }
+    }
+    
+    // ==================== 消息发送 ====================
+    
     async function sendMessage() {
+      if (isSending) return;
+      
       const input = document.getElementById('messageInput');
       const text = input.value.trim();
       if (!text) return;
@@ -509,22 +771,51 @@
       // 隐藏欢迎界面
       document.getElementById('welcomeScreen').style.display = 'none';
       
-      // 添加用户消息
+      // 添加用户消息到UI
       addMessage('user', text);
-      input.value = '';
       
-      // 模拟 AI 回复
+      // 添加到对话历史
+      chatHistories[currentAgent].push({ role: 'user', content: text });
+      
+      input.value = '';
+      autoResize(input);
+      
+      if (!isConnected) {
+        addMessage('assistant', '⚠️ 未连接到 OpenClaw 服务。请点击左下角"连接设置"配置连接信息，或点击"重连"按钮。');
+        return;
+      }
+      
+      // 显示打字动画
+      isSending = true;
       document.getElementById('sendBtn').disabled = true;
+      const typingEl = showTyping();
       
       try {
-        const result = await invoke('greet', { name: text });
+        // 构造消息列表（包含系统提示）
+        const systemPrompt = agents[currentAgent].systemPrompt;
+        const messages = [
+          { role: 'system', content: systemPrompt },
+          ...chatHistories[currentAgent]
+        ];
+        
+        const result = await invoke('send_chat_message', { messages });
+        
+        // 移除打字动画
+        typingEl.remove();
+        
+        // 添加AI回复
         addMessage('assistant', result);
+        chatHistories[currentAgent].push({ role: 'assistant', content: result });
       } catch (err) {
-        addMessage('assistant', `错误: ${err}`);
+        typingEl.remove();
+        addMessage('assistant', '❌ 请求失败: ' + err);
       } finally {
+        isSending = false;
         document.getElementById('sendBtn').disabled = false;
       }
     }
+    
+    // ==================== UI 辅助函数 ====================
     
     function addMessage(role, content) {
       const chatMessages = document.getElementById('chatMessages');
@@ -532,20 +823,53 @@
       msg.className = `message ${role}`;
       
       const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+      const senderName = role === 'user' ? '你' : agents[currentAgent].name;
       
       msg.innerHTML = `
         <div class="message-bubble">${escapeHtml(content)}</div>
-        <div class="message-meta">${role === 'user' ? '你' : agents[currentAgent].name} · ${time}</div>
+        <div class="message-meta">${senderName} · ${time}</div>
       `;
       
       chatMessages.appendChild(msg);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
+    function addSystemMessage(content) {
+      const chatMessages = document.getElementById('chatMessages');
+      const msg = document.createElement('div');
+      msg.style.cssText = 'text-align: center; padding: 12px; color: var(--text-secondary); font-size: 13px;';
+      msg.textContent = content;
+      chatMessages.appendChild(msg);
+    }
+    
+    function showTyping() {
+      const chatMessages = document.getElementById('chatMessages');
+      const msg = document.createElement('div');
+      msg.className = 'message assistant';
+      msg.id = 'typingIndicator';
+      msg.innerHTML = `
+        <div class="message-bubble">
+          <div class="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      `;
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return msg;
+    }
+    
     function escapeHtml(text) {
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+    
+    function autoResize(textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
     }
     
     function handleKeyDown(e) {
@@ -559,16 +883,7 @@
       const chatMessages = document.getElementById('chatMessages');
       chatMessages.innerHTML = '';
       document.getElementById('welcomeScreen').style.display = 'flex';
-      messages = [];
-    }
-    
-    async function callBackend() {
-      try {
-        const result = await invoke('greet', { name: '及时claw用户' });
-        alert('后端调用成功: ' + result);
-      } catch (err) {
-        alert('后端调用失败: ' + err);
-      }
+      chatHistories[currentAgent] = [];
     }
     
     function quickStart(text) {
@@ -576,12 +891,94 @@
       sendMessage();
     }
     
+    // ==================== Agent 切换 ====================
+    
+    document.querySelectorAll('.agent-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.agent-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        
+        currentAgent = item.dataset.agent;
+        const agent = agents[currentAgent];
+        document.getElementById('currentAgentName').textContent = agent.name;
+        document.getElementById('currentAgentDesc').textContent = agent.desc;
+        
+        // 切换Agent时恢复对应的对话历史
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.innerHTML = '';
+        
+        if (chatHistories[currentAgent].length === 0) {
+          document.getElementById('welcomeScreen').style.display = 'flex';
+        } else {
+          document.getElementById('welcomeScreen').style.display = 'none';
+          // 恢复历史消息
+          chatHistories[currentAgent].forEach(msg => {
+            addMessage(msg.role, msg.content);
+          });
+        }
+      });
+    });
+    
+    // ==================== 设置面板 ====================
+    
+    function openSettings() {
+      // 加载当前配置
+      invoke('get_config').then(config => {
+        document.getElementById('settingUrl').value = config.url || 'http://localhost:3000';
+        document.getElementById('settingApiKey').value = config.api_key || '';
+        document.getElementById('settingModel').value = config.model || 'qclaw/pool-glm-5.1';
+        document.getElementById('settingsOverlay').classList.add('show');
+      }).catch(err => {
+        document.getElementById('settingUrl').value = 'http://localhost:3000';
+        document.getElementById('settingApiKey').value = '';
+        document.getElementById('settingModel').value = 'qclaw/pool-glm-5.1';
+        document.getElementById('settingsOverlay').classList.add('show');
+      });
+    }
+    
+    function closeSettings() {
+      document.getElementById('settingsOverlay').classList.remove('show');
+    }
+    
+    function closeSettingsOutside(event) {
+      if (event.target === document.getElementById('settingsOverlay')) {
+        closeSettings();
+      }
+    }
+    
+    async function saveSettings() {
+      const config = {
+        url: document.getElementById('settingUrl').value.trim() || 'http://localhost:3000',
+        api_key: document.getElementById('settingApiKey').value.trim(),
+        model: document.getElementById('settingModel').value.trim() || 'qclaw/pool-glm-5.1',
+      };
+      
+      try {
+        await invoke('save_config_cmd', { config });
+        closeSettings();
+        // 保存后自动测试连接
+        await testConnection();
+      } catch (err) {
+        alert('保存设置失败: ' + err);
+      }
+    }
+    
+    // ==================== 初始化 ====================
+    
+    // 页面加载时自动测试连接
+    testConnection();
+    
     // 导出到全局
     window.sendMessage = sendMessage;
     window.handleKeyDown = handleKeyDown;
     window.clearChat = clearChat;
-    window.callBackend = callBackend;
     window.quickStart = quickStart;
+    window.testConnection = testConnection;
+    window.openSettings = openSettings;
+    window.closeSettings = closeSettings;
+    window.closeSettingsOutside = closeSettingsOutside;
+    window.saveSettings = saveSettings;
+    window.autoResize = autoResize;
   </script>
 </body>
 </html>
