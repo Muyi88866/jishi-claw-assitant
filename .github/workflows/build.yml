@@ -30,14 +30,11 @@ jobs:
     - name: Build frontend (Vite)
       run: npm run build
     
+    - name: Install Tauri CLI
+      run: npm install -g @tauri-apps/cli
+    
     - name: Build Tauri app
-      run: |
-        cd src-tauri
-        cargo build --release
-      
-    - name: Build Tauri bundle
-      run: |
-        npm run tauri build
+      run: npm run tauri build
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
